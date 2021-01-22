@@ -27,14 +27,18 @@ class WARD(VisionDataset):
 
     The above description is from paper:
     Chen Wang, Le Zhang, Lihua Xie, Junsong Yuan, Kernel Cross-Correlator (KCC), AAAI, 2018.
+
+    The dataset is from:
+    Yang, Allen Y., et al. "Distributed recognition of human actions using wearable
+    motion sensor networks." Journal of Ambient Intelligence and Smart Environments.
     '''
     url = 'https://github.com/wang-chen/KCC/releases/download/v1.0/ward.mat'
-    def __init__(self, root='/data/datasets', duration=50, train=True):
+    def __init__(self, root='/data/datasets', duration=50, train=True, resplit=False):
         super().__init__(root)
         assert duration < 300
         self.duration = duration
         processed = os.path.join(root, 'WARD/ward.%s.torch'%('train' if train else 'test'))
-        if not os.path.exists(processed):
+        if not os.path.exists(processed) or resplit:
             print('Downloading WARD dataset...')
             os.makedirs(os.path.join(root, 'WARD'), exist_ok=True)
             matfile = os.path.join(root, 'WARD/ward.mat')
@@ -42,13 +46,13 @@ class WARD(VisionDataset):
                 wget.download(self.url, matfile)
             sequence, size, data = [], [], scipy.io.loadmat(matfile)['data']
             person = range(10) if train else range(10, 13)
-            for activity in range(13):
-                for human in person:
-                    for trial in range(6): # some subject has 6 trails
+            for human in person:
+                for trial in range(6): # some subject has 6 trails
+                    for activity in range(13):
                         if data[human, activity, trial].size == 0:
                             continue
                         seq = torch.from_numpy(data[human, activity, trial]).T.to(torch.float32)
-                        sequence.append([seq, activity])
+                        sequence.append([seq.view(5,5,-1), activity])
                         size.append(torch.LongTensor([seq.size(-1)]))
             torch.save({'sequence':sequence, 'size':torch.cat(size)}, processed)
         data = torch.load(processed)
@@ -62,7 +66,7 @@ class WARD(VisionDataset):
         index = (self.cumsum - ret  >= 0).nonzero(as_tuple=False)[0]
         frame = self.cumsum[index] - ret
         sequence, target = self.sequence[index]
-        return sequence[:,frame:frame+self.duration], target
+        return sequence[:,:,frame:frame+self.duration], target
 
 
 if __name__ == "__main__":

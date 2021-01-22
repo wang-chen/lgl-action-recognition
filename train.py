@@ -84,7 +84,7 @@ if __name__ == "__main__":
     writter = SummaryWriter()
     net, criterion = CNN().to(args.device), nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.1)
-    scheduler = EarlyStopScheduler(optimizer, patience=3, factor=0.1, verbose=True, threshold=1e-1)
+    scheduler = EarlyStopScheduler(optimizer, patience=3, factor=0.1, verbose=True, min_lr=1e-4)
     print('Parameters: %d'%(count_parameters(net)))
 
     for epoch in range(args.epoch):
