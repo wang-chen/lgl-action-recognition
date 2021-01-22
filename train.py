@@ -10,10 +10,11 @@ import warnings
 import numpy as np
 import torch.nn as nn
 import torch.utils.data as Data
+from torch.utils.tensorboard import SummaryWriter
 
 from model import CNN
 from ward import WARD
-from torch_util import count_parameters, Timer
+from torch_util import count_parameters, Timer, EarlyStopScheduler
 
 sys.path.append('models')
 warnings.filterwarnings("ignore")
@@ -61,10 +62,10 @@ if __name__ == "__main__":
     parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
     parser.add_argument("--save", type=str, default='accuracy/cora-lgl-test', help="model file to save")
     parser.add_argument("--optm", type=str, default='SGD', help="SGD or Adam")
-    parser.add_argument("--lr", type=float, default=0.01, help="learning rate")
+    parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
     parser.add_argument("--epoch", type=int, default=50, help="epoch")
     parser.add_argument("--duration", type=int, default=50, help="duration")
-    parser.add_argument("--batch-size", type=int, default=50, help="minibatch size")
+    parser.add_argument("--batch-size", type=int, default=100, help="minibatch size")
     parser.add_argument("--jump", type=int, default=1, help="reply samples")
     parser.add_argument("--iteration", type=int, default=10, help="number of training iteration")
     parser.add_argument("--memory-size", type=int, default=500, help="number of samples")
@@ -80,8 +81,10 @@ if __name__ == "__main__":
     train_data = WARD(root=args.data_root, duration=args.duration, train=True)
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
+    writter = SummaryWriter()
     net, criterion = CNN().to(args.device), nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=args.lr)
+    optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.1)
+    scheduler = EarlyStopScheduler(optimizer, patience=3, factor=0.1, verbose=True, threshold=1e-1)
     print('Parameters: %d'%(count_parameters(net)))
 
     for epoch in range(args.epoch):
@@ -92,5 +95,10 @@ if __name__ == "__main__":
             loss = criterion(output, target)
             loss.backward()
             optimizer.step()
+            writter.add_scalar('loss', loss, epoch*len(train_loader)+batch_idx)
         acc = performance(test_loader, net, args.device)
+        writter.add_scalar('accuracy', acc, epoch)
         print('Epoch: %d, Acc: %f'%(epoch, acc))
+        if scheduler.step(1-acc):
+            print('Early Stoping..')
+            break
