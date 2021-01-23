@@ -17,9 +17,6 @@ from model import CNN, FGN
 from ward import WARD
 from torch_util import count_parameters, Timer, EarlyStopScheduler
 
-sys.path.append('models')
-warnings.filterwarnings("ignore")
-
 
 def performance(loader, net, device):
     net.eval()
@@ -35,21 +32,20 @@ def performance(loader, net, device):
     return acc
 
 
-def accuracy(net, loader, device, num_class):
-    net.eval()
+def train(loader, net, device):
+    net.train()
     correct, total = 0, 0
-    classes = torch.arange(num_class).view(-1,1).to(device)
-    with torch.no_grad():
-        for idx, (inputs, targets, neighbor) in enumerate(loader):
-            if torch.cuda.is_available():
-                inputs, targets, neighbor = inputs.to(device), targets.to(device), [item.to(device) for item in neighbor]
-            outputs = net(inputs, neighbor)
-            _, predicted = torch.max(outputs.data, 1)
-            total += (targets == classes).sum(1)
-            corrected = predicted==targets
-            correct += torch.stack([corrected[targets==i].sum() for i in range(num_class)])
-        acc = correct/total
-    return acc
+    for batch_idx, (inputs, target) in enumerate(tqdm.tqdm(train_loader)):
+        optimizer.zero_grad()
+        inputs, target = inputs.to(args.device), target.to(args.device)
+        output = net(inputs)
+        loss = criterion(output, target)
+        loss.backward()
+        optimizer.step()
+        _, predicted = torch.max(output.data, 1)
+        total += target.size(0)
+        correct += predicted.eq(target.data).cpu().sum().item()
+    return correct/total
 
 
 if __name__ == "__main__":
@@ -89,17 +85,10 @@ if __name__ == "__main__":
     print('Parameters: %d'%(count_parameters(net)))
 
     for epoch in range(args.epoch):
-        for batch_idx, (inputs, target) in enumerate(tqdm.tqdm(train_loader)):
-            optimizer.zero_grad()
-            inputs, target = inputs.to(args.device), target.to(args.device)
-            output = net(inputs)
-            loss = criterion(output, target)
-            loss.backward()
-            optimizer.step()
-            writter.add_scalar('loss', loss, epoch*len(train_loader)+batch_idx)
-        acc = performance(test_loader, net, args.device)
-        writter.add_scalar('accuracy', acc, epoch)
-        print('Epoch: %d, Acc: %f'%(epoch, acc))
-        if scheduler.step(1-acc):
+        train_acc = train(train_loader, net, args.device)
+        test_acc = performance(test_loader, net, args.device)
+        writter.add_scalar('accuracy', test_acc, epoch)
+        print('Epoch: %d, Train Acc: %f, Test Acc: %f'%(epoch, train_acc, test_acc))
+        if scheduler.step(1-test_acc):
             print('Early Stoping..')
             break
