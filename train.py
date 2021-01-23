@@ -13,9 +13,10 @@ import torch.utils.data as Data
 from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
-from model import CNN, FGN
 from ward import WARD
-from torch_util import count_parameters, Timer, EarlyStopScheduler
+from model import CNN, FGN
+from torch_util import count_parameters
+from torch_util import Timer, EarlyStopScheduler
 
 
 def performance(loader, net, device):
@@ -69,7 +70,6 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=0, help='Random seed.')
     parser.add_argument("-p", "--plot", action="store_true", help="increase output verbosity")
     parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")
-    parser.add_argument("--sample-rate", type=int, default=50, help="sampling rate for test acc, if ogb datasets please set it to 200")
     args = parser.parse_args(); print(args)
     torch.manual_seed(args.seed)
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
     writter = SummaryWriter()
-    net, criterion = FGN().to(args.device), nn.CrossEntropyLoss()
+    net, criterion = CNN().to(args.device), nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.1)
     scheduler = EarlyStopScheduler(optimizer, patience=2, factor=0.1, verbose=True, min_lr=1e-4)
     print('Parameters: %d'%(count_parameters(net)))
