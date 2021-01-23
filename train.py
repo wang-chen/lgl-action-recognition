@@ -10,9 +10,10 @@ import warnings
 import numpy as np
 import torch.nn as nn
 import torch.utils.data as Data
+from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
-from model import CNN
+from model import CNN, FGN
 from ward import WARD
 from torch_util import count_parameters, Timer, EarlyStopScheduler
 
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
     parser.add_argument("--save", type=str, default='accuracy/cora-lgl-test', help="model file to save")
     parser.add_argument("--optm", type=str, default='SGD', help="SGD or Adam")
-    parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
+    parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
     parser.add_argument("--epoch", type=int, default=50, help="epoch")
     parser.add_argument("--duration", type=int, default=50, help="duration")
     parser.add_argument("--batch-size", type=int, default=100, help="minibatch size")
@@ -82,9 +83,9 @@ if __name__ == "__main__":
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
     writter = SummaryWriter()
-    net, criterion = CNN().to(args.device), nn.CrossEntropyLoss()
+    net, criterion = FGN().to(args.device), nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.1)
-    scheduler = EarlyStopScheduler(optimizer, patience=3, factor=0.1, verbose=True, min_lr=1e-4)
+    scheduler = EarlyStopScheduler(optimizer, patience=2, factor=0.1, verbose=True, min_lr=1e-4)
     print('Parameters: %d'%(count_parameters(net)))
 
     for epoch in range(args.epoch):

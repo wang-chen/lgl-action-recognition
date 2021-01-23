@@ -5,42 +5,56 @@ import torch.nn as nn
 class CNN(nn.Module):
     def __init__(self):
         super().__init__()
-
-        self.features = nn.Sequential(
-            nn.Conv2d(5, 32, kernel_size=(5,10), stride=2, padding=0),
-            nn.BatchNorm2d(32), nn.ReLU(inplace=True),
-            nn.Conv2d(32, 32, kernel_size=(1,10), stride=2, padding=0),
-            nn.BatchNorm2d(32), nn.ReLU(inplace=True))
-
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(32 * 6, 13))
+        self.conv1 = nn.Conv2d(5, 32, kernel_size=(5,10), stride=2, padding=0)
+        self.acvt1 = nn.Sequential(nn.BatchNorm2d(32), nn.ReLU(inplace=True))
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=(1,10), stride=2, padding=0)
+        self.acvt2 = nn.Sequential(nn.BatchNorm2d(32), nn.ReLU(inplace=True))
+        self.linear = nn.Sequential(nn.Flatten(), nn.Linear(32 * 6, 13))
 
     def forward(self, x):
-        feature = self.features(x)
-        return self.classifier(feature)
+        x = self.conv1(x)
+        x = self.acvt1(x)
+        x = self.conv2(x)
+        x = self.acvt2(x)
+        return self.linear(x)
 
 
-class FeatTrans1d(nn.Module):
+class FGN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.tran1 = Trans1d(5, 32, kernel_size=(5,10), stride=2, padding=0)
+        self.acvt1 = nn.Sequential(nn.BatchNorm2d(32), nn.ReLU(inplace=True))
+        self.tran2 = Trans1d(32, 32, kernel_size=(1,10), stride=2, padding=0)
+        self.acvt2 = nn.Sequential(nn.BatchNorm2d(32), nn.ReLU(inplace=True))
+        self.linear = nn.Sequential(nn.Flatten(), nn.Linear(32 * 6, 13))
+
+    def forward(self, x):
+        x, y = self.tran1(x, x)
+        x, y = self.acvt1(x), self.acvt1(y)
+        x, y = self.tran2(x, y)
+        x, y = self.acvt2(x), self.acvt2(y)
+        return self.linear(x)
+
+
+class Trans1d(nn.Module):
     '''
     Temporal Feature Transforming Layer for multi-channel 1D features.
     '''
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
         super().__init__()
-        self.conv = nn.Conv1d(in_channels, out_channels, kernel_size, stride, padding)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
 
     def forward(self, x, neighbor):
-        B, C, F = x.shape
         adj = self.feature_adjacency(x, neighbor)
         x = self.transform(x, adj)
-        neighbor = torch.stack([self.transform(neighbor[:,i,:,:], adj) for i in range(neighbor.size(1))], dim=1)
+        neighbor = self.transform(neighbor, adj)
         return x, neighbor
 
     def transform(self, x, adj):
-        return self.conv((adj @ x.unsqueeze(-1)).squeeze(-1))
+        return self.conv(torch.einsum('bcxy,bncx->bncx', adj, x))
 
     def feature_adjacency(self, x, y):
-        fadj = torch.einsum('bcx,bncy->bcxy', x, y)
+        fadj = torch.einsum('bncx,bdcy->bcxy', x, y)
         fadj += fadj.transpose(-2, -1)
         return self.row_normalize(self.sgnroot(fadj))
 
@@ -51,11 +65,3 @@ class FeatTrans1d(nn.Module):
         x = x / (x.abs().sum(-1, keepdim=True) + 1e-7)
         x[torch.isnan(x)] = 0
         return x
-
-
-if __name__ == "__main__":
-    device = "cuda:0"
-    x = torch.randn(16, 5, 50).to(device)
-    conv = FeatTrans1d(5, 32, 10, 1, 0).to(device)
-    neighbor = torch.randn(16, 5, 5, 50).to(device)
-    y = conv(x, neighbor)
