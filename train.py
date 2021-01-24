@@ -79,7 +79,7 @@ if __name__ == "__main__":
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
     writter = SummaryWriter()
-    net, criterion = CNN().to(args.device), nn.CrossEntropyLoss()
+    net, criterion = FGN().to(args.device), nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.1)
     scheduler = EarlyStopScheduler(optimizer, patience=2, factor=0.1, verbose=True, min_lr=1e-4)
     print('Parameters: %d'%(count_parameters(net)))
