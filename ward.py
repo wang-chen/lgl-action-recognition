@@ -26,10 +26,10 @@ class WARD(VisionDataset):
     each of which lasts more than 10 seconds and is recorded at 30Hz.
 
     The above description is from paper:
-    Chen Wang, Le Zhang, Lihua Xie, Junsong Yuan, Kernel Cross-Correlator (KCC), AAAI, 2018.
+    [A] Chen Wang, Le Zhang, Lihua Xie, Junsong Yuan, Kernel Cross-Correlator (KCC), AAAI, 2018.
 
     The dataset is from:
-    Yang, Allen Y., et al. "Distributed recognition of human actions using wearable
+    [B] Yang, Allen Y., et al. "Distributed recognition of human actions using wearable
     motion sensor networks." Journal of Ambient Intelligence and Smart Environments.
     '''
     url = 'https://github.com/wang-chen/KCC/releases/download/v1.0/ward.mat'
@@ -39,19 +39,21 @@ class WARD(VisionDataset):
         self.duration = duration
         processed = os.path.join(root, 'WARD/ward.%s.torch'%('train' if train else 'test'))
         if not os.path.exists(processed) or resplit:
-            print('Downloading WARD dataset...')
             os.makedirs(os.path.join(root, 'WARD'), exist_ok=True)
             matfile = os.path.join(root, 'WARD/ward.mat')
             if not os.path.isfile(matfile):
+                print('Downloading WARD dataset...')
                 wget.download(self.url, matfile)
             sequence, size, data = [], [], scipy.io.loadmat(matfile)['data']
-            person = range(10) if train else range(10, 13)
-            for human in person:
+            print('Respliting train and test dataset...')
+            for human in range(20):
                 for trial in range(6): # some subject has 6 trails
                     for activity in range(13):
                         if data[human, activity, trial].size == 0:
                             continue
-                        seq = torch.from_numpy(data[human, activity, trial]).T.to(torch.float32)
+                        # Remove fisrt 75 unstable points as did in [A].
+                        seq = torch.from_numpy(data[human, activity, trial])[75:,:].T.to(torch.float32)
+                        seq = seq[:,:round(seq.size(-1)*0.8)] if train else seq[:,round(seq.size(-1)*0.8):]
                         sequence.append([seq.view(5,5,-1), activity])
                         size.append(torch.LongTensor([seq.size(-1)]))
             torch.save({'sequence':sequence, 'size':torch.cat(size)}, processed)
