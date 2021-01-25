@@ -46,8 +46,8 @@ class WARD(VisionDataset):
                 wget.download(self.url, matfile)
             sequence, size, data = [], [], scipy.io.loadmat(matfile)['data']
             print('Respliting train and test dataset...')
-            for human in range(20):
-                for trial in range(6): # some subject has 6 trails
+            for trial in range(6): # some subject has 6 trails
+                for human in range(20):
                     for activity in range(13):
                         if data[human, activity, trial].size == 0:
                             continue
