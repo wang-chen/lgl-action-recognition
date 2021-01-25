@@ -13,8 +13,9 @@ import torch.utils.data as Data
 from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
+from cnn import CNN
+from fgn import FGN
 from ward import WARD
-from model import CNN, FGN
 from torch_util import count_parameters
 from torch_util import Timer, EarlyStopScheduler
 
