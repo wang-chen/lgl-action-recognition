@@ -13,7 +13,7 @@ import torch.utils.data as Data
 from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
-from cnn import CNN
+from gat import GAT
 from fgn import FGN
 from ward import WARD
 from train import performance
@@ -99,12 +99,11 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
     parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location")
     parser.add_argument("--dataset", type=str, default='cora', help="cora, citeseer, or pubmed")
-    parser.add_argument("--model", type=str, default='LGL', help="LGL or SAGE")
+    parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
     parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
     parser.add_argument("--save", type=str, default='accuracy/cora-lgl-test', help="model file to save")
     parser.add_argument("--optm", type=str, default='SGD', help="SGD or Adam")
-    parser.add_argument("--lr", type=float, default=2e-4, help="learning rate")
-    parser.add_argument("--epoch", type=int, default=50, help="epoch")
+    parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
     parser.add_argument("--duration", type=int, default=50, help="duration")
     parser.add_argument("--batch-size", type=int, default=100, help="minibatch size")
     parser.add_argument("--eval-iter", type=int, default=300, help="evaluation iteration")
@@ -116,6 +115,8 @@ if __name__ == "__main__":
     parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")
     args = parser.parse_args(); print(args)
     torch.manual_seed(args.seed)
+    Nets = {'fgn':FGN, 'sage':SAGE, 'gat':GAT}
+    Net = Nets[args.model.lower()]
 
     test_data = WARD(root=args.data_root, duration=args.duration, train=False)
     test_loader = Data.DataLoader(dataset=test_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
@@ -123,12 +124,12 @@ if __name__ == "__main__":
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=False, drop_last=True)
 
     writter = SummaryWriter()
-    net = Lifelong(FGN(), args).to(args.device)
-    print('Parameters: %d'%(count_parameters(net)))
+    lgl = Lifelong(Net(), args).to(args.device)
+    print('Parameters: %d'%(count_parameters(lgl)))
     torch.autograd.set_detect_anomaly(True)
     for batch_idx, (inputs, targets) in enumerate(tqdm.tqdm(train_loader)):
         inputs, targets = inputs.to(args.device), targets.to(args.device)
-        net.observe(inputs, targets)
+        lgl.observe(inputs, targets)
         if (batch_idx+1) % args.eval_iter == 0:
-            test_acc = performance(test_loader, net, args.device)
+            test_acc = performance(test_loader, lgl.net, args.device)
             print('Test Acc: %f'%(test_acc))

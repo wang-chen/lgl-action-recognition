@@ -13,7 +13,7 @@ import torch.utils.data as Data
 from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
-from cnn import CNN
+from gat import GAT
 from fgn import FGN
 from ward import WARD
 from torch_util import count_parameters
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
     parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location")
     parser.add_argument("--dataset", type=str, default='cora', help="cora, citeseer, or pubmed")
-    parser.add_argument("--model", type=str, default='LGL', help="LGL or SAGE")
+    parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
     parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
     parser.add_argument("--save", type=str, default='accuracy/cora-lgl-test', help="model file to save")
     parser.add_argument("--optm", type=str, default='SGD', help="SGD or Adam")
@@ -73,6 +73,8 @@ if __name__ == "__main__":
     parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")
     args = parser.parse_args(); print(args)
     torch.manual_seed(args.seed)
+    Nets = {'fgn':FGN, 'gat':GAT}
+    Net = Nets[args.model.lower()]
 
     test_data = WARD(root=args.data_root, duration=args.duration, train=False)
     test_loader = Data.DataLoader(dataset=test_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
@@ -80,7 +82,7 @@ if __name__ == "__main__":
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
     writter = SummaryWriter()
-    net, criterion = FGN().to(args.device), nn.CrossEntropyLoss()
+    net, criterion = Net().to(args.device), nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.1)
     scheduler = EarlyStopScheduler(optimizer, patience=2, factor=0.1, verbose=True, min_lr=1e-4)
     print('Parameters: %d'%(count_parameters(net)))

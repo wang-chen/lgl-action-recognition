@@ -43,7 +43,7 @@ class Trans1d(nn.Module):
         return self.row_normalize(self.sgnroot(fadj))
 
     def sgnroot(self, x):
-        return x.sign()*(x.abs().sqrt())
+        return x.sign()*(x.abs().clamp(min=1e-8).sqrt())
 
     def row_normalize(self, x):
         x = x / (x.abs().sum(-1, keepdim=True) + 1e-7)
