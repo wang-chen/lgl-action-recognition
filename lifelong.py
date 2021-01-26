@@ -16,7 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 from gat import GAT
 from fgn import FGN
 from ward import WARD
-from train import performance
+from nonlifelong import performance
 from torch_util import count_parameters
 from torch_util import Timer, EarlyStopScheduler
 
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")
     args = parser.parse_args(); print(args)
     torch.manual_seed(args.seed)
-    Nets = {'fgn':FGN, 'sage':SAGE, 'gat':GAT}
+    Nets = {'fgn':FGN, 'gat':GAT}
     Net = Nets[args.model.lower()]
 
     test_data = WARD(root=args.data_root, duration=args.duration, train=False)
