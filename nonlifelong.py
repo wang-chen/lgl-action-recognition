@@ -9,6 +9,7 @@ import argparse
 import warnings
 import numpy as np
 import torch.nn as nn
+from torch import optim
 import torch.utils.data as Data
 from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
@@ -57,11 +58,11 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
     parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location")
     parser.add_argument("--dataset", type=str, default='cora', help="cora, citeseer, or pubmed")
-    parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
+    parser.add_argument("--model", type=str, default='GAT', help="FGN or GAT")
     parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
-    parser.add_argument("--save", type=str, default='accuracy/cora-lgl-test', help="model file to save")
-    parser.add_argument("--optm", type=str, default='SGD', help="SGD or Adam")
-    parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
+    parser.add_argument("--save", type=str, default='accuracy/', help="model file to save")
+    parser.add_argument("--optim", type=str, default='SGD', help="SGD or Adam")
+    parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
     parser.add_argument("--epoch", type=int, default=50, help="epoch")
     parser.add_argument("--duration", type=int, default=50, help="duration")
     parser.add_argument("--batch-size", type=int, default=100, help="minibatch size")
@@ -83,7 +84,9 @@ if __name__ == "__main__":
 
     writter = SummaryWriter()
     net, criterion = Net().to(args.device), nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.1)
+    optims = {'sgd': optim.SGD(net.parameters(), lr=args.lr, momentum=0.1),
+              'adam': optim.Adam(net.parameters(), lr=args.lr)}
+    optimizer = optims[args.optim.lower()]
     scheduler = EarlyStopScheduler(optimizer, patience=2, factor=0.1, verbose=True, min_lr=1e-4)
     print('Parameters: %d'%(count_parameters(net)))
 
