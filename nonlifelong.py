@@ -2,16 +2,12 @@
 import os
 import sys
 import tqdm
-import copy
 import torch
 import os.path
 import argparse
-import warnings
-import numpy as np
 import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
-from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
 from gat import GAT
@@ -67,8 +63,6 @@ if __name__ == "__main__":
     parser.add_argument("--duration", type=int, default=50, help="duration")
     parser.add_argument("--batch-size", type=int, default=100, help="minibatch size")
     parser.add_argument("--jump", type=int, default=1, help="reply samples")
-    parser.add_argument("--iteration", type=int, default=10, help="number of training iteration")
-    parser.add_argument("--memory-size", type=int, default=500, help="number of samples")
     parser.add_argument("--seed", type=int, default=0, help='Random seed.')
     parser.add_argument("-p", "--plot", action="store_true", help="increase output verbosity")
     parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")

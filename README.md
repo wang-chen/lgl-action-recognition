@@ -5,7 +5,7 @@
 
    
    Temporal and distributed pattern recognition using
-   based on Wearable Action Recognition Dataset (WARD).
+   the Wearable Action Recognition Dataset (WARD).
 
    For feature graph network (FGN):
 
