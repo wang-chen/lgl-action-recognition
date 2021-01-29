@@ -13,22 +13,9 @@ import torch.utils.data as Data
 from gat import GAT
 from fgn import FGN
 from ward import WARD
+from evaluation import performance
 from torch_util import count_parameters
 from torch_util import EarlyStopScheduler
-
-
-def performance(loader, net, device):
-    net.eval()
-    correct, total = 0, 0
-    with torch.no_grad():
-        for batch_idx, (inputs, targets) in enumerate(tqdm.tqdm(loader)):
-            inputs, targets  = inputs.to(device), targets.to(device)
-            outputs = net(inputs)
-            _, predicted = torch.max(outputs.data, 1)
-            total += targets.size(0)
-            correct += predicted.eq(targets.data).cpu().sum().item()
-        acc = correct/total
-    return acc
 
 
 def train(loader, net, device):
@@ -54,8 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
     parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location to be download")
     parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
-    parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
-    parser.add_argument("--save", type=str, default='saves/test', help="model file to save")
+    parser.add_argument("--save", type=str, default='saves', help="location to save model")
     parser.add_argument("--optim", type=str, default='SGD', help="SGD or Adam")
     parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
     parser.add_argument("--epoch", type=int, default=50, help="epoch")
@@ -64,7 +50,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=0, help='Random seed.')
     args = parser.parse_args(); print(args)
     os.makedirs(args.data_root, exist_ok=True)
-    os.makedirs('saves', exist_ok=True)
+    os.makedirs(args.save, exist_ok=True)
     torch.manual_seed(args.seed)
     Nets = {'fgn':FGN, 'gat':GAT}
     Net = Nets[args.model.lower()]
@@ -88,8 +74,9 @@ if __name__ == "__main__":
 
         if best_acc < test_acc and args.save is not None:
             best_acc = test_acc
-            print('Saving new best model to', args.save+'.model')
-            torch.save(net, args.save+'.model')
+            filename = args.save+'/nonlifelong-%s-s%d.model'%(args.model, args.seed)
+            print('Saving new best model to', filename)
+            torch.save(net, filename)
 
         if scheduler.step(1-test_acc):
             print('Early Stoping..')

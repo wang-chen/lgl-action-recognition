@@ -14,7 +14,7 @@ import torch.utils.data as Data
 from gat import GAT
 from fgn import FGN
 from ward import WARD
-from nonlifelong import performance
+from evaluation import performance
 from torch_util import count_parameters
 
 
@@ -97,8 +97,7 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
     parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location to be download")
     parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
-    parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
-    parser.add_argument("--save", type=str, default='saves/test', help="model file to save")
+    parser.add_argument("--save", type=str, default='saves', help="location to save model")
     parser.add_argument("--optim", type=str, default='SGD', help="SGD or Adam")
     parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
     parser.add_argument("--duration", type=int, default=50, help="duration")
@@ -109,7 +108,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=0, help='Random seed.')
     args = parser.parse_args(); print(args)
     os.makedirs(args.data_root, exist_ok=True)
-    os.makedirs('saves', exist_ok=True)
+    os.makedirs(args.save, exist_ok=True)
     torch.manual_seed(args.seed)
     Nets = {'fgn':FGN, 'gat':GAT}
     Net = Nets[args.model.lower()]
@@ -129,5 +128,10 @@ if __name__ == "__main__":
             test_acc = performance(test_loader, lgl.net, args.device)
             print('Test Acc: %f'%(test_acc))
             if args.save is not None:
-                print('Saving model to', args.save+'-%d.model'%(batch_idx))
-                torch.save(lgl.net, args.save+'-%d.model'%(batch_idx))
+                filename = args.save+'/lifelong-%s-s%d-it%d.model'%(args.model, args.seed, batch_idx+1)
+                print('Saving model to', filename)
+                torch.save(lgl.net, filename)
+
+    test_acc = performance(test_loader, lgl.net, args.device)
+    print('Final Test Acc: %f'%(test_acc))
+    torch.save(lgl.net, args.save+'/lifelong-%s-s%d.model'%(args.model, args.seed))
