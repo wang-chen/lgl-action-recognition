@@ -8,14 +8,14 @@
 
    For feature graph network (FGN):
 
-    python nonlifelong.py --model FGN --optim SGD --lr 1e-3 --save saves/nonlifelong-fgn
-    python lifelong.py --model FGN --optim SGD --lr 1e-3 --memory-size 5000 --save saves/lifelong-fgn
+    python nonlifelong.py --model FGN --optim SGD
+    python lifelong.py --model FGN --optim SGD
 
    For graph attention network (GAT):
 
-    python nonlifelong.py --model GAT --optim Adam --lr 1e-3 --save saves/nonlifelong-gat
-    python lifelong.py --model FGN --optim Adam --lr 1e-3 --memory-size 5000 --save saves/lifelong-gat
+    python nonlifelong.py --model GAT --optim Adam
+    python lifelong.py --model FGN --optim Adam
 
    You can also specify the dataset location to be downloaded (Default: /data/datasets). For example:
 
-    python nonlifelong.py --data-root ./ --model FGN --optim SGD --lr 1e-3 --save saves/nonlifelong-fgn
+    python nonlifelong.py --data-root ./ --model FGN --optim SGD
