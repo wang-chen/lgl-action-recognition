@@ -35,19 +35,18 @@ class WARD(VisionDataset):
     motion sensor networks." Journal of Ambient Intelligence and Smart Environments.
     '''
     url = 'https://github.com/wang-chen/KCC/releases/download/v1.0/ward.mat'
-    def __init__(self, root='/data/datasets', duration=50, train=True, resplit=False):
+    def __init__(self, root='/data/datasets', duration=50, train=True):
         super().__init__(root)
         assert duration < 300
         self.duration = duration
         processed = os.path.join(root, 'WARD/ward.%s.torch'%('train' if train else 'test'))
-        if not os.path.exists(processed) or resplit:
+        if not os.path.exists(processed):
             os.makedirs(os.path.join(root, 'WARD'), exist_ok=True)
             matfile = os.path.join(root, 'WARD/ward.mat')
             if not os.path.isfile(matfile):
                 print('Downloading WARD dataset...')
                 wget.download(self.url, matfile)
             sequence, size, data = [], [], scipy.io.loadmat(matfile)['data']
-            print('Respliting train and test dataset...')
             for trial in range(6): # some subject has 6 trails
                 for human in range(20):
                     for activity in range(13):
