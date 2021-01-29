@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # Arguements
     parser = argparse.ArgumentParser(description='Feature Graph Networks')
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
-    parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location")
+    parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location to be download")
     parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
     parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
     parser.add_argument("--save", type=str, default='saves/test', help="model file to save")
@@ -113,6 +113,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--plot", action="store_true", help="increase output verbosity")
     parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")
     args = parser.parse_args(); print(args)
+    os.makedirs(args.data_root, exist_ok=True)
     os.makedirs('saves', exist_ok=True)
     torch.manual_seed(args.seed)
     Nets = {'fgn':FGN, 'gat':GAT}
