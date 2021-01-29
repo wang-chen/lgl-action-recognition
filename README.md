@@ -1,9 +1,8 @@
 # Lifelong Graph Learning
 
-   This repo is for the application of paper "Bridging Graph Network to Lifelong
+   This repo is for the application in paper "Bridging Graph Network to Lifelong
    Learning with Feature Correlation".
 
-   
    Temporal and distributed pattern recognition using
    the Wearable Action Recognition Dataset (WARD).
 
@@ -16,3 +15,7 @@
 
     python nonlifelong.py --model GAT --optim Adam --lr 1e-3 --save saves/nonlifelong-gat
     python lifelong.py --model FGN --optim Adam --lr 1e-3 --memory-size 5000 --save saves/lifelong-gat
+
+   You can also specify the dataset location to be downloaded. For example:
+
+    python nonlifelong.py --data-root ./ --model FGN --optim SGD --lr 1e-3 --save saves/nonlifelong-fgn
