@@ -8,7 +8,6 @@ import argparse
 import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
-from torch.utils.tensorboard import SummaryWriter
 
 from gat import GAT
 from fgn import FGN
@@ -53,12 +52,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Feature Graph Networks')
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
     parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location")
-    parser.add_argument("--dataset", type=str, default='cora', help="cora, citeseer, or pubmed")
-    parser.add_argument("--model", type=str, default='GAT', help="FGN or GAT")
+    parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
     parser.add_argument("--load", type=str, default=None, help="load pretrained model file")
-    parser.add_argument("--save", type=str, default='accuracy/', help="model file to save")
+    parser.add_argument("--save", type=str, default='saves/test', help="model file to save")
     parser.add_argument("--optim", type=str, default='SGD', help="SGD or Adam")
-    parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
+    parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
     parser.add_argument("--epoch", type=int, default=50, help="epoch")
     parser.add_argument("--duration", type=int, default=50, help="duration")
     parser.add_argument("--batch-size", type=int, default=100, help="minibatch size")
@@ -67,6 +65,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--plot", action="store_true", help="increase output verbosity")
     parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")
     args = parser.parse_args(); print(args)
+    os.makedirs('saves', exist_ok=True)
     torch.manual_seed(args.seed)
     Nets = {'fgn':FGN, 'gat':GAT}
     Net = Nets[args.model.lower()]
@@ -76,8 +75,7 @@ if __name__ == "__main__":
     train_data = WARD(root=args.data_root, duration=args.duration, train=True)
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
-    writter = SummaryWriter()
-    net, criterion = Net().to(args.device), nn.CrossEntropyLoss()
+    net, criterion, best_acc = Net().to(args.device), nn.CrossEntropyLoss(), 0
     optims = {'sgd': optim.SGD(net.parameters(), lr=args.lr, momentum=0.1),
               'adam': optim.Adam(net.parameters(), lr=args.lr)}
     optimizer = optims[args.optim.lower()]
@@ -87,8 +85,13 @@ if __name__ == "__main__":
     for epoch in range(args.epoch):
         train_acc = train(train_loader, net, args.device)
         test_acc = performance(test_loader, net, args.device)
-        writter.add_scalar('accuracy', test_acc, epoch)
         print('Epoch: %d, Train Acc: %f, Test Acc: %f'%(epoch, train_acc, test_acc))
+
+        if best_acc < test_acc and args.save is not None:
+            best_acc = test_acc
+            print('Saving new best model to', args.save+'.model')
+            torch.save(net, args.save+'.model')
+
         if scheduler.step(1-test_acc):
             print('Early Stoping..')
             break

@@ -9,10 +9,10 @@
 
    For feature graph network (FGN):
 
-        python nonlifelong.py --model FGN --optim SGD --lr 1e-3
-        python lifelong.py --memory-size 5000 --model FGN --optim SGD --lr 1e-3
+          python nonlifelong.py --model FGN --optim SGD --lr 1e-3 --save saves/nonlifelong-fgn
+          python lifelong.py --model FGN --optim SGD --lr 1e-3 --memory-size 5000 --save saves/lifelong-fgn
 
    For graph attention network (GAT):
 
-        python nonlifelong.py --model GAT --optim Adam --lr 1e-3
-        python lifelong.py --memory-size 5000 --model GAT --optim Adam --lr 1e-3
+          python nonlifelong.py --model GAT --optim Adam --lr 1e-3 --save saves/nonlifelong-gat
+          python lifelong.py --model FGN --optim Adam --lr 1e-3 --memory-size 5000 --save saves/lifelong-gat
