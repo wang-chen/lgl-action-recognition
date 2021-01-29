@@ -16,7 +16,6 @@ from fgn import FGN
 from ward import WARD
 from nonlifelong import performance
 from torch_util import count_parameters
-from torch_util import Timer, EarlyStopScheduler
 
 
 class Lifelong(nn.Module):
@@ -91,7 +90,6 @@ class Lifelong(nn.Module):
             self.memory_order = self.memory_order[mask]
 
 
-
 if __name__ == "__main__":
 
     # Arguements
@@ -106,12 +104,9 @@ if __name__ == "__main__":
     parser.add_argument("--duration", type=int, default=50, help="duration")
     parser.add_argument("--batch-size", type=int, default=100, help="minibatch size")
     parser.add_argument("--eval-iter", type=int, default=300, help="evaluation iteration")
-    parser.add_argument("--jump", type=int, default=1, help="reply samples")
     parser.add_argument("--iteration", type=int, default=50, help="number of training iteration")
     parser.add_argument("--memory-size", type=int, default=5000, help="number of samples")
     parser.add_argument("--seed", type=int, default=0, help='Random seed.')
-    parser.add_argument("-p", "--plot", action="store_true", help="increase output verbosity")
-    parser.add_argument("--eval", type=str, default=None, help="the path to eval the acc")
     args = parser.parse_args(); print(args)
     os.makedirs(args.data_root, exist_ok=True)
     os.makedirs('saves', exist_ok=True)
