@@ -28,7 +28,7 @@ class GAT(nn.Module):
 
 
 class GraphAttn(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, feat_len, alpha=0.2, dropout=0.2):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, feat_len, alpha=0.2):
         super().__init__()
         self.tran = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, padding_mode='circular')
         self.att1 = nn.Linear(feat_len, 1, bias=False)
