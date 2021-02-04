@@ -42,9 +42,9 @@
 
 # Citation
 
-      @article{wang2020lifelong,
-        title={Bridging Graph Network to Lifelong Learning with Feature Correlation},
-        author={Wang, Chen and Qiu, Yuheng, Gao, Dasong and Scherer, Sebastian},
-        journal={arXiv preprint arXiv:2009.00647},
-        year={2020}
-      }
+    @article{wang2020lifelong,
+      title={Bridging Graph Network to Lifelong Learning with Feature Correlation},
+      author={Wang, Chen and Qiu, Yuheng, Gao, Dasong and Scherer, Sebastian},
+      journal={arXiv preprint arXiv:2009.00647},
+      year={2020}
+    }
