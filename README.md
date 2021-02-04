@@ -34,6 +34,11 @@
    The above models are results with random seed 0.
 
    You can find all pre-trained models (random seed 0-4) in the above link.
+   
+   We also provide snapshot models during training, which is named as "[task]-[model]-s[seed]-it[iteration].model". 
+   
+   For example, "lifelong-FGN-s0-it3000.model"
+
 
 # Citation
 
