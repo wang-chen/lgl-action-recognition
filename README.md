@@ -3,7 +3,7 @@
    This repo is for the application in paper "Bridging Graph Network to Lifelong
    Learning with Feature Correlation".
 
-   Temporal and distributed pattern recognition using
+   **Temporal and distributed pattern recognition** using
    the Wearable Action Recognition Dataset (WARD).
 
 # Training and Testing
@@ -34,3 +34,12 @@
    The above models are results with random seed 0.
 
    You can find all pre-trained models (random seed 0-4) in the above link.
+
+# Citation
+
+      @article{wang2020lifelong,
+        title={Bridging Graph Network to Lifelong Learning with Feature Correlation},
+        author={Wang, Chen and Qiu, Yuheng, Gao, Dasong and Scherer, Sebastian},
+        journal={arXiv preprint arXiv:2009.00647},
+        year={2020}
+      }
