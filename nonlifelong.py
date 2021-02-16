@@ -21,9 +21,9 @@ from torch_util import EarlyStopScheduler
 def train(loader, net, device):
     net.train()
     correct, total = 0, 0
-    for batch_idx, (inputs, target) in enumerate(tqdm.tqdm(train_loader)):
+    for batch_idx, (inputs, target) in enumerate(tqdm.tqdm(loader)):
         optimizer.zero_grad()
-        inputs, target = inputs.to(args.device), target.to(args.device)
+        inputs, target = inputs.to(device), target.to(device)
         output = net(inputs)
         loss = criterion(output, target)
         loss.backward()
