@@ -11,9 +11,12 @@ import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
 
+from gcn import GCN
 from gat import GAT
 from fgn import FGN
+from afgn import AFGN
 from ward import WARD
+from appnp import APPNP
 from evaluation import performance
 from torch_util import count_parameters
 
@@ -96,7 +99,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Feature Graph Networks')
     parser.add_argument("--device", type=str, default='cuda:0', help="cuda or cpu")
     parser.add_argument("--data-root", type=str, default='/data/datasets', help="dataset location to be download")
-    parser.add_argument("--model", type=str, default='FGN', help="FGN or GAT")
+    parser.add_argument("--model", type=str, default='FGN', help="FGN, AFGN, GCN, GAT, APPNP")
     parser.add_argument("--save", type=str, default='saves', help="location to save model")
     parser.add_argument("--optim", type=str, default='SGD', help="SGD or Adam")
     parser.add_argument("--lr", type=float, default=1e-3, help="learning rate")
@@ -110,7 +113,7 @@ if __name__ == "__main__":
     os.makedirs(args.data_root, exist_ok=True)
     os.makedirs(args.save, exist_ok=True)
     torch.manual_seed(args.seed)
-    Nets = {'fgn':FGN, 'gat':GAT}
+    Nets = {'fgn':FGN, 'afgn':AFGN, 'gcn':GCN, 'gat':GAT, 'appnp':APPNP}
     Net = Nets[args.model.lower()]
 
     test_data = WARD(root=args.data_root, duration=args.duration, train=False)
