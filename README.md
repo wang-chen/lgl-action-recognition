@@ -16,7 +16,7 @@
    For graph attention network (GAT):
 
     python nonlifelong.py --model GAT --optim Adam
-    python lifelong.py --model FGN --optim Adam
+    python lifelong.py --model GAT --optim Adam
 
    You can also specify the dataset location to be downloaded (Default: /data/datasets). For example:
 
