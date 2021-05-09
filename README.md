@@ -8,15 +8,32 @@
 
 # Training and Testing
 
+   **Note that AFGN and GAT perform the best with Adam, while the others perform the best with SGD.**
+
    For feature graph network (FGN):
 
     python nonlifelong.py --model FGN --optim SGD
     python lifelong.py --model FGN --optim SGD
+    
+   For attention feature graph network (AFGN):
+
+    python nonlifelong.py --model AFGN --optim Adam
+    python lifelong.py --model AFGN --optim Adam
 
    For graph attention network (GAT):
 
     python nonlifelong.py --model GAT --optim Adam
     python lifelong.py --model GAT --optim Adam
+  
+   For grach convolutional network (GCN):
+
+    python nonlifelong.py --model GCN --optim SGD
+    python lifelong.py --model GCN --optim SGD
+    
+   For approximated personalized propagation of neural predictions (APPNP):
+
+    python nonlifelong.py --model APPNP --optim SGD
+    python lifelong.py --model APPNP --optim SGD
 
    You can also specify the dataset location to be downloaded (Default: /data/datasets). For example:
 
