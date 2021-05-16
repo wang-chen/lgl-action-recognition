@@ -11,14 +11,10 @@ import torch.nn as nn
 from torch import optim
 import torch.utils.data as Data
 
-from gcn import GCN
-from gat import GAT
-from fgn import FGN
-from afgn import AFGN
 from ward import WARD
-from appnp import APPNP
 from evaluation import performance
 from torch_util import count_parameters
+from models import GCN, GAT, MLP, FGN, AFGN, APPNP
 
 
 class Lifelong(nn.Module):
@@ -113,7 +109,7 @@ if __name__ == "__main__":
     os.makedirs(args.data_root, exist_ok=True)
     os.makedirs(args.save, exist_ok=True)
     torch.manual_seed(args.seed)
-    Nets = {'fgn':FGN, 'afgn':AFGN, 'gcn':GCN, 'gat':GAT, 'appnp':APPNP}
+    Nets = {'fgn':FGN, 'afgn':AFGN, 'mlp':MLP, 'gcn':GCN, 'gat':GAT, 'appnp':APPNP}
     Net = Nets[args.model.lower()]
 
     test_data = WARD(root=args.data_root, duration=args.duration, train=False)

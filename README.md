@@ -12,32 +12,37 @@
 
    For feature graph network (FGN):
 
-    python nonlifelong.py --model FGN --optim SGD
+    python regular.py --model FGN --optim SGD
     python lifelong.py --model FGN --optim SGD
     
    For attention feature graph network (AFGN):
 
-    python nonlifelong.py --model AFGN --optim Adam
+    python regular.py --model AFGN --optim Adam
     python lifelong.py --model AFGN --optim Adam
+
+   For multi-layer perceptron (MLP):
+
+    python regular.py --model MLP --optim Adam
+    python lifelong.py --model MLP --optim Adam
 
    For graph attention network (GAT):
 
-    python nonlifelong.py --model GAT --optim Adam
+    python regular.py --model GAT --optim Adam
     python lifelong.py --model GAT --optim Adam
   
    For grach convolutional network (GCN):
 
-    python nonlifelong.py --model GCN --optim SGD
+    python regular.py --model GCN --optim SGD
     python lifelong.py --model GCN --optim SGD
     
    For approximated personalized propagation of neural predictions (APPNP):
 
-    python nonlifelong.py --model APPNP --optim SGD
+    python regular.py --model APPNP --optim SGD
     python lifelong.py --model APPNP --optim SGD
 
    You can also specify the dataset location to be downloaded (Default: /data/datasets). For example:
 
-    python nonlifelong.py --data-root ./ --model FGN --optim SGD
+    python regular.py --data-root ./ --model FGN --optim SGD
 
 # Reproduce results in the paper
 
