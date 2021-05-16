@@ -28,18 +28,17 @@ class APPNP(nn.Module):
 
 
 class GraphAppnp(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, feat_len, alpha=0.2):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, feat_len, alpha=0.9):
         super().__init__()
         self.tran = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, padding_mode='circular')
         self.norm = nn.Sequential(nn.Softmax(dim=1))
-        self.leakyrelu = nn.LeakyReLU(alpha)
+        self.leakyrelu, self.alpha = nn.LeakyReLU(), alpha
 
     def forward(self, x, n):
         h1, h2 = self.tran(x), self.tran(n)
         B, N, C, F = h1.shape
-        h1 = self.tran(x).view(B, N, C*F)
-        h2 = self.tran(n).view(B, N, C*F)
-        a = torch.einsum('bnf,bmf->bnm', h1, h2)
+        x = self.tran(x).view(B, N, C*F)
+        n = self.tran(n).view(B, N, C*F)
+        a = torch.einsum('bnf,bmf->bnm', x, n)
         a = self.leakyrelu(a)
-        return (self.norm(a) @ h1).view(B, N, C, F)
-
+        return (1-self.alpha) * (self.norm(a) @ x).view(B, N, C, F) + self.alpha * h1
