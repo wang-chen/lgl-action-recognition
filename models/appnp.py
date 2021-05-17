@@ -32,13 +32,13 @@ class GraphAppnp(nn.Module):
         super().__init__()
         self.tran = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, padding_mode='circular')
         self.norm = nn.Sequential(nn.Softmax(dim=1))
-        self.leakyrelu, self.alpha = nn.LeakyReLU(), alpha
+        self.leakyrelu, self.alpha = nn.LeakyReLU(0.2), alpha
 
     def forward(self, x, n):
         h1, h2 = self.tran(x), self.tran(n)
         B, N, C, F = h1.shape
-        x = self.tran(x).view(B, N, C*F)
-        n = self.tran(n).view(B, N, C*F)
+        x = h1.view(B, N, C*F)
+        n = h2.view(B, N, C*F)
         a = torch.einsum('bnf,bmf->bnm', x, n)
         a = self.leakyrelu(a)
         return (1-self.alpha) * (self.norm(a) @ x).view(B, N, C, F) + self.alpha * h1

@@ -28,17 +28,17 @@ class GCN(nn.Module):
 
 
 class GraphConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, feat_len, alpha=0.2):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, feat_len):
         super().__init__()
         self.tran = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, padding_mode='circular')
         self.norm = nn.Sequential(nn.Softmax(dim=1))
-        self.leakyrelu = nn.LeakyReLU(alpha)
+        self.leakyrelu = nn.LeakyReLU(0.2)
 
     def forward(self, x, n):
         h1, h2 = self.tran(x), self.tran(n)
         B, N, C, F = h1.shape
-        h1 = self.tran(x).view(B, N, C*F)
-        h2 = self.tran(n).view(B, N, C*F)
-        a = torch.einsum('bnf,bmf->bnm', h1, h2)
+        x = h1.view(B, N, C*F)
+        n = h2.view(B, N, C*F)
+        a = torch.einsum('bnf,bmf->bnm', x, n)
         a = self.leakyrelu(a)
-        return (self.norm(a) @ h1).view(B, N, C, F)
+        return (self.norm(a) @ x).view(B, N, C, F)
