@@ -33,14 +33,12 @@ class GraphAttn(nn.Module):
         self.tran = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, padding_mode='circular')
         self.att1 = nn.Linear(feat_len, 1, bias=False)
         self.att2 = nn.Linear(feat_len, 1, bias=False)
-        self.norm = nn.Sequential(nn.Softmax(dim=1))
-        self.leakyrelu = nn.LeakyReLU(0.2)
+        self.norm = nn.Sequential(nn.LeakyReLU(0.2), nn.Softmax(dim=1))
 
     def forward(self, x, n):
-        h1, h2 = self.tran(x), self.tran(n)
-        B, N, C, F = h1.shape
-        h1 = h1.view(B, N, C*F)
-        h2 = h2.view(B, N, C*F)
-        a = self.att1(h1) + self.att2(h2).transpose(-1,-2)
-        a = self.leakyrelu(a)
-        return (self.norm(a) @ h1).view(B, N, C, F)
+        x, n = self.tran(x), self.tran(n)
+        B, N, C, F = x.shape
+        x = x.view(B, N, C*F)
+        n = n.view(B, N, C*F)
+        a = self.att1(x).transpose(-1,-2) + self.att2(n)
+        return (self.norm(a) @ x).view(B, N, C, F)
