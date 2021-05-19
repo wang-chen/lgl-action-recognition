@@ -33,8 +33,7 @@ class AttTrans1d(nn.Module):
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, padding_mode='circular')
         self.att1 = nn.Linear(feat_len, in_channels, bias=False)
         self.att2 = nn.Linear(feat_len, in_channels, bias=False)
-        self.norm = nn.Sequential(nn.Softmax(dim=1))
-        self.leakyrelu = nn.LeakyReLU(alpha)
+        self.norm = nn.Sequential(nn.LeakyReLU(alpha), nn.Softmax(dim=-1))
 
     def forward(self, x, neighbor):
         adj = self.feature_adjacency(x, neighbor)
@@ -45,7 +44,7 @@ class AttTrans1d(nn.Module):
 
     def feature_adjacency(self, x, y):
         w = torch.einsum('bnij,bdkl->bnd', self.att1.weight*x, self.att2.weight*y)
-        fadj = torch.einsum('bncx,bdcy,bnd->bcxy', x, y, w)
+        fadj = torch.einsum('bncx,bdcy,bnd->bcxy', x, y, self.norm(w))
         fadj += fadj.transpose(-2, -1)
         return self.row_normalize(self.sgnroot(fadj))
 
