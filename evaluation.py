@@ -2,9 +2,10 @@ import tqdm
 import torch
 
 
-def performance(loader, net, device):
+def performance(loader, net, device, save=None):
     net.eval()
     correct, total = 0, 0
+    T, P, perclass = [], [], []
     with torch.no_grad():
         for batch_idx, (inputs, targets) in enumerate(tqdm.tqdm(loader)):
             inputs, targets  = inputs.to(device), targets.to(device)
@@ -12,8 +13,13 @@ def performance(loader, net, device):
             _, predicted = torch.max(outputs.data, 1)
             total += targets.size(0)
             correct += predicted.eq(targets.data).cpu().sum().item()
+            T.append(targets)
+            P.append(predicted)
         acc = correct/total
-    return acc
+    T, P = torch.cat(T, dim=-1), torch.cat(P, dim=-1)
+    for i in range(T.max()+1):
+        perclass.append((T[T==i] == P[T==i]).sum()/T[T==i].numel())
+    return acc, torch.stack(perclass).cpu().tolist()
 
 
 if __name__ == "__main__":
@@ -34,8 +40,9 @@ if __name__ == "__main__":
     train_data = WARD(root=args.data_root, duration=args.duration, train=True)
     train_loader = Data.DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
-    net = torch.load(args.load)
-    train_acc = performance(train_loader, net, args.device)
-    test_acc = performance(test_loader, net, args.device)
+    net = torch.load(args.load, map_location=args.device)
+    train_acc, train_class = performance(train_loader, net, args.device)
+    test_acc, test_class = performance(test_loader, net, args.device, args.load)
     print("Evaluating model: ", args.load)
     print("Train Acc: %f; Test Acc: %f"%(train_acc, test_acc))
+    print("Train Class: {}\n Test Class: {}".format(train_class, test_class))
