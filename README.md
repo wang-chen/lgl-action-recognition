@@ -46,8 +46,8 @@
 
 # Reproduce results in the paper
 
-   Download [pre-trained models](https://github.com/wang-chen/graph-action-recognition/releases/download/v2.0/saves.zip) and extract. Then run:
-   
+   Download [pre-trained models (v2.0)](https://github.com/wang-chen/graph-action-recognition/releases/download/v2.0/saves.zip) and extract. Then run:
+
     python evaluation.py --load saves/lifelong-fgn-s0.model
     python evaluation.py --load saves/lifelong-afgn-s0.model
     python evaluation.py --load saves/lifelong-appnp-s0.model
