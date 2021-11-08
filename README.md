@@ -1,10 +1,8 @@
 # Lifelong Graph Learning
 
-   This repo is for the application in paper "Bridging Graph Network to Lifelong
-   Learning with Feature Correlation".
+   This repo is for the application in paper "[Lifelong Graph Learning](https://arxiv.org/pdf/2009.00647.pdf)".
 
-   **Temporal and distributed pattern recognition** using
-   the Wearable Action Recognition Dataset (WARD).
+   **Temporal and distributed pattern recognition** using the Wearable Action Recognition Dataset (WARD).
 
 # Training and Testing
 
