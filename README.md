@@ -63,7 +63,7 @@
 
     @article{wang2020lifelong,
       title={Lifelong Graph Learning},
-      author={Wang, Chen and Qiu, Yuheng and Scherer, Sebastian},
+      author={Wang, Chen and Qiu, Yuheng and Gao, Dasong and Scherer, Sebastian},
       journal={arXiv preprint arXiv:2009.00647},
-      year={2020}
+      year={2021}
     }
