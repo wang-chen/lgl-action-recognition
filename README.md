@@ -1,6 +1,6 @@
 # Lifelong Graph Learning
 
-   This repo is for the application in paper "[Lifelong Graph Learning](https://arxiv.org/pdf/2009.00647.pdf)".
+   This repo is for the application in paper "[Lifelong Graph Learning](https://arxiv.org/pdf/2009.00647.pdf)", CVPR, 2022.
 
    **Temporal and distributed pattern recognition** using the Wearable Action Recognition Dataset (WARD).
 
@@ -59,9 +59,9 @@
 
 # Citation
 
-    @article{wang2020lifelong,
-      title={Lifelong Graph Learning},
+    @inproceedings{wang2022lifelong,
+      title={Lifelong graph learning},
       author={Wang, Chen and Qiu, Yuheng and Gao, Dasong and Scherer, Sebastian},
-      journal={arXiv preprint arXiv:2009.00647},
-      year={2021}
+      booktitle={2022 Conference on Computer Vision and Pattern Recognition (CVPR)},
+      year={2022}
     }
